@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İhale Hesaplayıcı Akıllı Girdi</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: #1e1e1e;
+            padding: 4px 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 {
+            color: #ff9800;
+            margin: 2px 0 6px 0;
+            font-size: 20px;
+            text-align: center;
+        }
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        input {
+            flex: 1;
+            padding: 10px 5px;
+            font-size: 24px;
+            border: 2px solid #ff9800;
+            border-radius: 8px;
+            background-color: #2b2b2b;
+            color: white;
+            text-align: center;
+            font-weight: 900;
+        }
+        .clear-btn {
+            padding: 0 25px;
+            font-size: 24px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+        }
+        .progress-container {
+            background-color: #333;
+            border-radius: 3px;
+            height: 6px;
+            width: 100%;
+            margin-bottom: 6px;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f44336, #ff9800, #4caf50);
+        }
+        
+        .header-row {
+            display: flex;
+            background-color: #ff9800;
+            color: black;
+            font-weight: 900;
+            font-size: 16px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 2px;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+            width: 100%;
+            height: 42px;
+        }
+        .col-left {
+            width: 40%;
+            font-weight: 900;
+            font-size: 17px;
+            text-align: left;
+        }
+        .col-right {
+            width: 60%;
+            font-weight: 900;
+            text-align: center;
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        /* Renkler aynen korundu */
+        #p85 { color: #ffd700; }
+        #p70 { color: #c0c0c0; }
+        #p55 { color: #cd7f32; }
+        #p40 { color: #ffff00; }
+        #p30 { color: #ff3333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Parapania İhale Hesapla</h2>
+    
+    <div class="input-group">
+        <input type="text" id="budget" placeholder="Bütçe" inputmode="decimal" oninput="formatGirdiVeHesapla(this)">
+        <button class="clear-btn" onclick="temizle()">X</button>
+    </div>
+
+    <div class="progress-container" id="barContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="header-row">
+        <div style="width: 40%; text-align: left;">Hedef / Yüzde</div>
+        <div style="width: 60%; text-align: center;">Teklif Tutarı</div>
+    </div>
+
+    <div class="results-list">
+        <div class="row"><div class="col-left">🏆 %85</div><div class="col-right" id="p85">0,00 ₺</div></div>
+        <div class="row"><div class="col-left">🥈 %70</div><div class="col-right" id="p70">0,00 ₺</div></div>
+        <div class="row"><div class="col-left">🥉 %55</div><div class="col-right" id="p55">0,00 ₺</div></div>
+        <div class="row"><div class="col-left">⏳ %40</div><div class="col-right" id="p40">0,00 ₺</div></div>
+        <div class="row"><div class="col-left">💤 %30</div><div class="col-right" id="p30">0,00 ₺</div></div>
+    </div>
+</div>
+
+<script>
+    // Teklifleri noktalı Türkçe formatta yazar
+    function formatMoney(value) {
+        return value.toLocaleString('tr-TR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " ₺";
+    }
+
+    // Giriş kutusuna yazarken araya otomatik boşluk koyan akıllı fonksiyon
+    function formatGirdiVeHesapla(input) {
+        // Sadece sayıları ve varsa kuruş için virgül/noktayı al, diğer her şeyi temizle
+        let temizVeri = input.value.replace(/[^0-9.,]/g, '');
+        
+        // Eğer birden fazla nokta veya virgül varsa ilkini baz alması için düzeltme yapıyoruz
+        temizVeri = temizVeri.replace(/,/g, '.'); // Kolaylık için virgülü noktaya çeviriyoruz
+        let parcalar = temizVeri.split('.');
+        
+        // Tam sayı kısmını alıp üçerli basamaklarına boşluk ekliyoruz
+        parcalar[0] = parcalar[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        
+        // Eğer kuruş kısmı varsa en fazla 2 basamakla sınırla
+        if (parcalar[1] !== undefined) {
+            parcalar[1] = parcalar[1].substring(0, 2);
+            input.value = parcalar[0] + "," + parcalar[1]; // Kuruşu virgüle çevirip birleştiriyoruz
+        } else {
+            input.value = parcalar[0];
+        }
+
+        // Hesaplama yapmak için boşlukları temizleyip saf sayıya çeviriyoruz
+        let hesaplanacakSayi = parseFloat(temizVeri);
+
+        let barContainer = document.getElementById('barContainer');
+        let progressBar = document.getElementById('progressBar');
+
+        if (isNaN(hesaplanacakSayi) || hesaplanacakSayi <= 0) {
+            barContainer.style.display = "none";
+            progressBar.style.width = "0%";
+            sifirlaTablo();
+            return;
+        }
+
+        barContainer.style.display = "block";
+        progressBar.style.width = "100%";
+
+        const percentages = [85, 70, 55, 40, 30];
+        percentages.forEach(p => {
+            let sonuc = (hesaplanacakSayi * p) / 100;
+            document.getElementById('p' + p).innerText = formatMoney(sonuc);
+        });
+    }
+
+    function temizle() {
+        document.getElementById('budget').value = "";
+        document.getElementById('barContainer').style.display = "none";
+        document.getElementById('progressBar').style.width = "0%";
+        sifirlaTablo();
+    }
+
+    function sifirlaTablo() {
+        const percentages = [85, 70, 55, 40, 30];
+        percentages.forEach(p => {
+            document.getElementById('p' + p).innerText = "0,00 ₺";
+        });
+    }
+</script>
+
+</body>
+</html>
