@@ -1,0 +1,16 @@
+{
+  "name": "Parapania İhale Hesaplama",
+  "short_name": "Parapania",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background-color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3062/3062635.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
