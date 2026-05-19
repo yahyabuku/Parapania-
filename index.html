@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İhale Hesaplayıcı Akıllı Girdi</title>
+    <title>İhale Hesaplayıcı Kopyalama Modu</title>
     <style>
         * {
             box-sizing: border-box;
@@ -77,7 +77,7 @@
             background-color: #ff9800;
             color: black;
             font-weight: 900;
-            font-size: 16px;
+            font-size: 15px;
             padding: 6px 10px;
             border-radius: 6px;
             margin-bottom: 2px;
@@ -99,20 +99,43 @@
             height: 42px;
         }
         .col-left {
-            width: 40%;
+            width: 30%; /* Buton geldiği için alanlar optimize edildi */
             font-weight: 900;
-            font-size: 17px;
+            font-size: 16px;
             text-align: left;
         }
         .col-right {
-            width: 60%;
+            width: 53%;
             font-weight: 900;
+            text-align: right; /* Sayılar kopyala butonuna yakın dursun */
+            padding-right: 5px;
+            font-size: 28px; /* Buton yerleşimi için hafif dengelendi */
+            line-index: 1;
+        }
+        .col-btn {
+            width: 17%;
             text-align: center;
-            font-size: 32px;
-            line-height: 1;
+        }
+        
+        /* Kopyalama Butonu Tasarımı */
+        .copy-btn {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #ff9800;
+            border-radius: 6px;
+            padding: 4px 0;
+            width: 100%;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:active {
+            background-color: #ff9800;
+            color: black;
         }
 
-        /* Renkler aynen korundu */
+        /* Renk Tanımlamaları */
         #p85 { color: #ffd700; }
         #p70 { color: #c0c0c0; }
         #p55 { color: #cd7f32; }
@@ -135,21 +158,44 @@
     </div>
 
     <div class="header-row">
-        <div style="width: 40%; text-align: left;">Hedef / Yüzde</div>
-        <div style="width: 60%; text-align: center;">Teklif Tutarı</div>
+        <div style="width: 30%; text-align: left;">Hedef</div>
+        <div style="width: 53%; text-align: right; padding-right: 15px;">Teklif Tutarı</div>
+        <div style="width: 17%; text-align: center;">Kopyala</div>
     </div>
 
     <div class="results-list">
-        <div class="row"><div class="col-left">🏆 %85</div><div class="col-right" id="p85">0,00 ₺</div></div>
-        <div class="row"><div class="col-left">🥈 %70</div><div class="col-right" id="p70">0,00 ₺</div></div>
-        <div class="row"><div class="col-left">🥉 %55</div><div class="col-right" id="p55">0,00 ₺</div></div>
-        <div class="row"><div class="col-left">⏳ %40</div><div class="col-right" id="p40">0,00 ₺</div></div>
-        <div class="row"><div class="col-left">💤 %30</div><div class="col-right" id="p30">0,00 ₺</div></div>
+        <div class="row">
+            <div class="col-left">🏆 %85</div>
+            <div class="col-right" id="p85">0,00 ₺</div>
+            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(85, this)">📋</button></div>
+        </div>
+        <div class="row">
+            <div class="col-left">🥈 %70</div>
+            <div class="col-right" id="p70">0,00 ₺</div>
+            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(70, this)">📋</button></div>
+        </div>
+        <div class="row">
+            <div class="col-left">🥉 %55</div>
+            <div class="col-right" id="p55">0,00 ₺</div>
+            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(55, this)">📋</button></div>
+        </div>
+        <div class="row">
+            <div class="col-left">⏳ %40</div>
+            <div class="col-right" id="p40">0,00 ₺</div>
+            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(40, this)">📋</button></div>
+        </div>
+        <div class="row">
+            <div class="col-left">💤 %30</div>
+            <div class="col-right" id="p30">0,00 ₺</div>
+            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(30, this)">📋</button></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Teklifleri noktalı Türkçe formatta yazar
+    // Global ham sonuçları tutmak için bir nesne oluşturuyoruz
+    let hamSonuclar = { 85: 0, 70: 0, 55: 0, 40: 0, 30: 0 };
+
     function formatMoney(value) {
         return value.toLocaleString('tr-TR', {
             minimumFractionDigits: 2,
@@ -157,29 +203,21 @@
         }) + " ₺";
     }
 
-    // Giriş kutusuna yazarken araya otomatik boşluk koyan akıllı fonksiyon
     function formatGirdiVeHesapla(input) {
-        // Sadece sayıları ve varsa kuruş için virgül/noktayı al, diğer her şeyi temizle
         let temizVeri = input.value.replace(/[^0-9.,]/g, '');
-        
-        // Eğer birden fazla nokta veya virgül varsa ilkini baz alması için düzeltme yapıyoruz
-        temizVeri = temizVeri.replace(/,/g, '.'); // Kolaylık için virgülü noktaya çeviriyoruz
+        temizVeri = temizVeri.replace(/,/g, '.');
         let parcalar = temizVeri.split('.');
         
-        // Tam sayı kısmını alıp üçerli basamaklarına boşluk ekliyoruz
         parcalar[0] = parcalar[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
         
-        // Eğer kuruş kısmı varsa en fazla 2 basamakla sınırla
         if (parcalar[1] !== undefined) {
             parcalar[1] = parcalar[1].substring(0, 2);
-            input.value = parcalar[0] + "," + parcalar[1]; // Kuruşu virgüle çevirip birleştiriyoruz
+            input.value = parcalar[0] + "," + parcalar[1];
         } else {
             input.value = parcalar[0];
         }
 
-        // Hesaplama yapmak için boşlukları temizleyip saf sayıya çeviriyoruz
         let hesaplanacakSayi = parseFloat(temizVeri);
-
         let barContainer = document.getElementById('barContainer');
         let progressBar = document.getElementById('progressBar');
 
@@ -196,7 +234,34 @@
         const percentages = [85, 70, 55, 40, 30];
         percentages.forEach(p => {
             let sonuc = (hesaplanacakSayi * p) / 100;
+            hamSonuclar[p] = sonuc; // Ham sayıyı sakla
             document.getElementById('p' + p).innerText = formatMoney(sonuc);
+        });
+    }
+
+    // Sadece tam kısmı panoya kopyalayan akıllı fonksiyon
+    function kopyalaTamKisim(yuzde, buton) {
+        let deger = hamSonuclar[yuzde];
+        if (!deger || deger <= 0) return;
+
+        // Sayının sadece tam kısmını alıyoruz (Math.floor ile aşağı yuvarlayarak saf tam sayı)
+        let tamKisim = Math.floor(deger).toString();
+
+        // Panoya kopyalama işlemi
+        navigator.clipboard.writeText(tamKisim).then(() => {
+            let eskiSimge = buton.innerText;
+            buton.innerText = "✔️";
+            buton.style.borderColor = "#4caf50";
+            buton.style.color = "#4caf50";
+            
+            // 1 saniye sonra butonu eski haline getir
+            setTimeout(() => {
+                buton.innerText = eskiSimge;
+                buton.style.borderColor = "#ff9800";
+                buton.style.color = "#fff";
+            }, 1000);
+        }).catch(err => {
+            console.log("Kopyalama başarısız: ", err);
         });
     }
 
@@ -210,6 +275,7 @@
     function sifirlaTablo() {
         const percentages = [85, 70, 55, 40, 30];
         percentages.forEach(p => {
+            hamSonuclar[p] = 0;
             document.getElementById('p' + p).innerText = "0,00 ₺";
         });
     }
