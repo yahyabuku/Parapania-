@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İhale Hesaplayıcı Kopyalama Modu</title>
+    <title>İhale Hesaplayıcı Hızlı Başlat Modu</title>
     <style>
         * {
             box-sizing: border-box;
@@ -47,6 +47,12 @@
             color: white;
             text-align: center;
             font-weight: 900;
+        }
+        /* Aktif/Odaklanmış kutu görünümü */
+        input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
         }
         .clear-btn {
             padding: 0 25px;
@@ -99,7 +105,7 @@
             height: 42px;
         }
         .col-left {
-            width: 30%; /* Buton geldiği için alanlar optimize edildi */
+            width: 30%;
             font-weight: 900;
             font-size: 16px;
             text-align: left;
@@ -107,17 +113,16 @@
         .col-right {
             width: 53%;
             font-weight: 900;
-            text-align: right; /* Sayılar kopyala butonuna yakın dursun */
+            text-align: right;
             padding-right: 5px;
-            font-size: 28px; /* Buton yerleşimi için hafif dengelendi */
-            line-index: 1;
+            font-size: 28px;
+            line-height: 1;
         }
         .col-btn {
             width: 17%;
             text-align: center;
         }
         
-        /* Kopyalama Butonu Tasarımı */
         .copy-btn {
             background-color: #333;
             color: #fff;
@@ -135,7 +140,6 @@
             color: black;
         }
 
-        /* Renk Tanımlamaları */
         #p85 { color: #ffd700; }
         #p70 { color: #c0c0c0; }
         #p55 { color: #cd7f32; }
@@ -149,7 +153,7 @@
     <h2>Parapania İhale Hesapla</h2>
     
     <div class="input-group">
-        <input type="text" id="budget" placeholder="Bütçe" inputmode="decimal" oninput="formatGirdiVeHesapla(this)">
+        <input type="text" id="budget" placeholder="Bütçe" inputmode="decimal" autofocus oninput="formatGirdiVeHesapla(this)">
         <button class="clear-btn" onclick="temizle()">X</button>
     </div>
 
@@ -193,8 +197,16 @@
 </div>
 
 <script>
-    // Global ham sonuçları tutmak için bir nesne oluşturuyoruz
     let hamSonuclar = { 85: 0, 70: 0, 55: 0, 40: 0, 30: 0 };
+
+    // Sayfa tamamen yüklendiğinde kutuya odaklanmayı zorunlu kılan tetikleyici
+    window.addEventListener('DOMContentLoaded', () => {
+        const budgetInput = document.getElementById('budget');
+        setTimeout(() => {
+            budgetInput.focus();
+            budgetInput.click(); // Bazı tarayıcıların klavyeyi açması için tıklama simülasyonu
+        }, 150);
+    });
 
     function formatMoney(value) {
         return value.toLocaleString('tr-TR', {
@@ -234,42 +246,43 @@
         const percentages = [85, 70, 55, 40, 30];
         percentages.forEach(p => {
             let sonuc = (hesaplanacakSayi * p) / 100;
-            hamSonuclar[p] = sonuc; // Ham sayıyı sakla
+            hamSonuclar[p] = sonuc;
             document.getElementById('p' + p).innerText = formatMoney(sonuc);
         });
     }
 
-    // Sadece tam kısmı panoya kopyalayan akıllı fonksiyon
     function kopyalaTamKisim(yuzde, buton) {
         let deger = hamSonuclar[yuzde];
         if (!deger || deger <= 0) return;
 
-        // Sayının sadece tam kısmını alıyoruz (Math.floor ile aşağı yuvarlayarak saf tam sayı)
         let tamKisim = Math.floor(deger).toString();
 
-        // Panoya kopyalama işlemi
         navigator.clipboard.writeText(tamKisim).then(() => {
             let eskiSimge = buton.innerText;
             buton.innerText = "✔️";
             buton.style.borderColor = "#4caf50";
             buton.style.color = "#4caf50";
             
-            // 1 saniye sonra butonu eski haline getir
             setTimeout(() => {
                 buton.innerText = eskiSimge;
                 buton.style.borderColor = "#ff9800";
                 buton.style.color = "#fff";
-            }, 1000);
+                
+                // Kopyalamadan sonra odağı tekrar bütçe kutusuna ver ve klavyeyi açık tut
+                document.getElementById('budget').focus();
+            }, 800);
         }).catch(err => {
             console.log("Kopyalama başarısız: ", err);
         });
     }
 
     function temizle() {
-        document.getElementById('budget').value = "";
+        const budgetInput = document.getElementById('budget');
+        budgetInput.value = "";
         document.getElementById('barContainer').style.display = "none";
         document.getElementById('progressBar').style.width = "0%";
         sifirlaTablo();
+        budgetInput.focus(); // Temizledikten sonra klavye kapanmasın diye odağı geri ver
     }
 
     function sifirlaTablo() {
