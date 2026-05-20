@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İhale Hesaplayıcı - Otomatik Klavye</title>
+    <title>İhale Hesaplayıcı - Geniş Buton Modu</title>
     <style>
         * {
             box-sizing: border-box;
@@ -22,25 +22,25 @@
             width: 100vw;
             height: 100vh;
             background: #1e1e1e;
-            padding: 4px 12px;
+            padding: 6px 14px;
             display: flex;
             flex-direction: column;
         }
         h2 {
             color: #ff9800;
-            margin: 2px 0 6px 0;
-            font-size: 20px;
+            margin: 4px 0 8px 0;
+            font-size: 22px;
             text-align: center;
         }
         .input-group {
             display: flex;
-            gap: 8px;
-            margin-bottom: 4px;
+            gap: 10px;
+            margin-bottom: 6px;
         }
         input {
             flex: 1;
-            padding: 10px 5px;
-            font-size: 24px;
+            padding: 12px 6px;
+            font-size: 26px;
             border: 2px solid #ff9800;
             border-radius: 8px;
             background-color: #2b2b2b;
@@ -51,11 +51,11 @@
         input:focus {
             outline: none;
             border-color: #4caf50;
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
         }
         .clear-btn {
-            padding: 0 25px;
-            font-size: 24px;
+            padding: 0 28px;
+            font-size: 26px;
             background-color: #f44336;
             color: white;
             border: none;
@@ -68,7 +68,7 @@
             border-radius: 3px;
             height: 6px;
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             display: none;
         }
         .progress-bar {
@@ -82,61 +82,69 @@
             background-color: #ff9800;
             color: black;
             font-weight: 900;
-            font-size: 15px;
-            padding: 6px 10px;
+            font-size: 16px;
+            padding: 8px 12px;
             border-radius: 6px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .results-list {
             display: flex;
             flex-direction: column;
             width: 100%;
+            gap: 6px; /* Satırların kendi arasındaki boşluğu artırdık */
         }
         .row {
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 0;
+            padding: 2px 0;
             border-bottom: 1px solid #333;
             width: 100%;
-            height: 42px;
+            height: 54px; /* Satır yüksekliğini artırarak basma alanını genişlettik */
         }
         .col-left {
-            width: 30%;
+            width: 25%;
             font-weight: 900;
-            font-size: 16px;
+            font-size: 18px;
             text-align: left;
+            padding-left: 4px;
         }
-        .col-right {
-            width: 53%;
+        .col-center {
+            width: 50%;
             font-weight: 900;
-            text-align: right;
-            padding-right: 5px;
+            text-align: center; /* Sayıları tam ortaya hizaladık */
             font-size: 28px;
             line-height: 1;
         }
-        .col-btn {
-            width: 17%;
-            text-align: center;
+        .col-right-btn {
+            width: 25%; /* Buton alanını genişlettik */
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .copy-btn {
             background-color: #333;
             color: #fff;
-            border: 1px solid #ff9800;
-            border-radius: 6px;
-            padding: 4px 0;
+            border: 2px solid #ff9800;
+            border-radius: 8px;
             width: 100%;
-            font-size: 15px;
+            height: 44px; /* Butonun dikey yüksekliğini artırdık */
+            font-size: 18px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
         }
         .copy-btn:active {
             background-color: #ff9800;
             color: black;
+            transform: scale(0.95);
         }
 
         #p85 { color: #ffd700; }
@@ -161,36 +169,36 @@
     </div>
 
     <div class="header-row">
-        <div style="width: 30%; text-align: left;">Hedef</div>
-        <div style="width: 53%; text-align: right; padding-right: 15px;">Teklif Tutarı</div>
-        <div style="width: 17%; text-align: center;">Kopyala</div>
+        <div style="width: 25%; text-align: left; padding-left: 4px;">Hedef</div>
+        <div style="width: 50%; text-align: center;">Teklif Tutarı</div>
+        <div style="width: 25%; text-align: center;">Kopyala</div>
     </div>
 
     <div class="results-list">
         <div class="row">
             <div class="col-left">🏆 %85</div>
-            <div class="col-right" id="p85">0,00 ₺</div>
-            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(85, this)">📋</button></div>
+            <div class="col-center" id="p85">0,00 ₺</div>
+            <div class="col-right-btn"><button class="copy-btn" onclick="kopyalaTamKisim(85, this)">📋 Kopyala</button></div>
         </div>
         <div class="row">
             <div class="col-left">🥈 %70</div>
-            <div class="col-right" id="p70">0,00 ₺</div>
-            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(70, this)">📋</button></div>
+            <div class="col-center" id="p70">0,00 ₺</div>
+            <div class="col-right-btn"><button class="copy-btn" onclick="kopyalaTamKisim(70, this)">📋 Kopyala</button></div>
         </div>
         <div class="row">
             <div class="col-left">🥉 %55</div>
-            <div class="col-right" id="p55">0,00 ₺</div>
-            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(55, this)">📋</button></div>
+            <div class="col-center" id="p55">0,00 ₺</div>
+            <div class="col-right-btn"><button class="copy-btn" onclick="kopyalaTamKisim(55, this)">📋 Kopyala</button></div>
         </div>
         <div class="row">
             <div class="col-left">⏳ %40</div>
-            <div class="col-right" id="p40">0,00 ₺</div>
-            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(40, this)">📋</button></div>
+            <div class="col-center" id="p40">0,00 ₺</div>
+            <div class="col-right-btn"><button class="copy-btn" onclick="kopyalaTamKisim(40, this)">📋 Kopyala</button></div>
         </div>
         <div class="row">
             <div class="col-left">💤 %30</div>
-            <div class="col-right" id="p30">0,00 ₺</div>
-            <div class="col-btn"><button class="copy-btn" onclick="kopyalaTamKisim(30, this)">📋</button></div>
+            <div class="col-center" id="p30">0,00 ₺</div>
+            <div class="col-right-btn"><button class="copy-btn" onclick="kopyalaTamKisim(30, this)">📋 Kopyala</button></div>
         </div>
     </div>
 </div>
@@ -198,14 +206,13 @@
 <script>
     let hamSonuclar = { 85: 0, 70: 0, 55: 0, 40: 0, 30: 0 };
 
-    // Tarayıcı engelini aşmak için agresif klavye tetikleyici döngüsü
     function klavyeyiZorla() {
         const budgetInput = document.getElementById('budget');
-        budgetInput.blur(); // Önce odağı çek
+        budgetInput.blur();
         setTimeout(() => {
-            budgetInput.focus(); // Yeniden odaklanıp klavyeyi yukarı itmeye zorla
+            budgetInput.focus();
             if(navigator.virtualKeyboard) {
-                navigator.virtualKeyboard.show(); // Destekleyen modern tarayıcılarda doğrudan klavyeyi açar
+                navigator.virtualKeyboard.show();
             }
         }, 50);
     }
@@ -263,13 +270,13 @@
         let tamKisim = Math.floor(deger).toString();
 
         navigator.clipboard.writeText(tamKisim).then(() => {
-            let eskiSimge = buton.innerText;
-            buton.innerText = "✔️";
+            let eskiMetin = buton.innerHTML;
+            buton.innerHTML = "✔️ Kopyalandı";
             buton.style.borderColor = "#4caf50";
             buton.style.color = "#4caf50";
             
             setTimeout(() => {
-                buton.innerText = eskiSimge;
+                buton.innerHTML = eskiMetin;
                 buton.style.borderColor = "#ff9800";
                 buton.style.color = "#fff";
                 document.getElementById('budget').focus();
@@ -298,5 +305,4 @@
 </script>
 
 </body>
-            </html>
-    
+</html>
