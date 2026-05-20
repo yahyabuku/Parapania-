@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İhale Hesaplayıcı Hızlı Başlat Modu</title>
+    <title>İhale Hesaplayıcı - Otomatik Klavye</title>
     <style>
         * {
             box-sizing: border-box;
@@ -48,7 +48,6 @@
             text-align: center;
             font-weight: 900;
         }
-        /* Aktif/Odaklanmış kutu görünümü */
         input:focus {
             outline: none;
             border-color: #4caf50;
@@ -153,7 +152,7 @@
     <h2>Parapania İhale Hesapla</h2>
     
     <div class="input-group">
-        <input type="text" id="budget" placeholder="Bütçe" inputmode="decimal" autofocus oninput="formatGirdiVeHesapla(this)">
+        <input type="text" id="budget" placeholder="Bütçe" inputmode="decimal" pattern="[0-9]*" autofocus oninput="formatGirdiVeHesapla(this)">
         <button class="clear-btn" onclick="temizle()">X</button>
     </div>
 
@@ -199,14 +198,20 @@
 <script>
     let hamSonuclar = { 85: 0, 70: 0, 55: 0, 40: 0, 30: 0 };
 
-    // Sayfa tamamen yüklendiğinde kutuya odaklanmayı zorunlu kılan tetikleyici
-    window.addEventListener('DOMContentLoaded', () => {
+    // Tarayıcı engelini aşmak için agresif klavye tetikleyici döngüsü
+    function klavyeyiZorla() {
         const budgetInput = document.getElementById('budget');
+        budgetInput.blur(); // Önce odağı çek
         setTimeout(() => {
-            budgetInput.focus();
-            budgetInput.click(); // Bazı tarayıcıların klavyeyi açması için tıklama simülasyonu
-        }, 150);
-    });
+            budgetInput.focus(); // Yeniden odaklanıp klavyeyi yukarı itmeye zorla
+            if(navigator.virtualKeyboard) {
+                navigator.virtualKeyboard.show(); // Destekleyen modern tarayıcılarda doğrudan klavyeyi açar
+            }
+        }, 50);
+    }
+
+    window.addEventListener('DOMContentLoaded', klavyeyiZorla);
+    window.addEventListener('load', klavyeyiZorla);
 
     function formatMoney(value) {
         return value.toLocaleString('tr-TR', {
@@ -267,8 +272,6 @@
                 buton.innerText = eskiSimge;
                 buton.style.borderColor = "#ff9800";
                 buton.style.color = "#fff";
-                
-                // Kopyalamadan sonra odağı tekrar bütçe kutusuna ver ve klavyeyi açık tut
                 document.getElementById('budget').focus();
             }, 800);
         }).catch(err => {
@@ -282,7 +285,7 @@
         document.getElementById('barContainer').style.display = "none";
         document.getElementById('progressBar').style.width = "0%";
         sifirlaTablo();
-        budgetInput.focus(); // Temizledikten sonra klavye kapanmasın diye odağı geri ver
+        budgetInput.focus();
     }
 
     function sifirlaTablo() {
@@ -295,4 +298,5 @@
 </script>
 
 </body>
-</html>
+            </html>
+    
